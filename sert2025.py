@@ -10,12 +10,12 @@ import io
 # ==== Настройки ====sudo apt-get install python3-venv
 
 template_pdf = "template.pdf"
-output_pdf = "barcodes_ready.pdf"
+output_pdf = "barcodes_40_2.pdf"
 x_pos_mm = 220
 y_pos_mm = 62
 
-start_number = 40100000000037
-end_number = 40100000000066
+start_number = 40100000000137
+end_number = 40100000000186
 
 # ==== Параметры writer ====
 writer_options = {
