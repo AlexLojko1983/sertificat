@@ -9,14 +9,13 @@ import io
 
 # ==== Настройки ====sudo apt-get install python3-venv
 
-template_pdf = "template.pdf"
-output_pdf = "barcodes_40_4.pdf"
+template_pdf = "сертификат_40.pdf"
+output_pdf = "barcodes_40_26.pdf"
 x_pos_mm = 220
 y_pos_mm = 62
 
-start_number = 40100000000237
-end_number = 40100000000286
-
+start_number = 40100000001387
+end_number = 40100000001436
 # ==== Параметры writer ====
 writer_options = {
     "font_size": 6,  # уменьшенный шрифт подписи
