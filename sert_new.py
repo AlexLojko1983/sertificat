@@ -14,8 +14,8 @@ output_name_pattern = "barcodes_new_40_{}.pdf"  # {} будет номер па�
 x_pos_mm = 220
 y_pos_mm = 62
 
-start_number = 40100000001537
-end_number = 40100000002536
+start_number = 40100000004537
+end_number = 40100000006536
 
 batch_size = 50  # <--- создаём отдельный файл каждые 50 шт.
 
@@ -29,7 +29,7 @@ writer_options = {
 
 template = PdfReader(template_pdf)
 
-current_batch = 5   # Начальный номер пачки
+current_batch = 65   # Начальный номер пачки
 counter = 0
 writer = PdfWriter()
 
