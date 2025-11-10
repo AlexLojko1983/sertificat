@@ -9,13 +9,13 @@ import io
 from copy import deepcopy
 
 # ==== Настройки ====#
-template_pdf = "сертификат_40.pdf"
-output_name_pattern = "barcodes_new_40_{}.pdf"  # {} будет номер пачки
+template_pdf = "сертификат_хим.pdf"
+output_name_pattern = "barcodes_him_40_{}.pdf"  # {} будет номер пачки
 x_pos_mm = 220
 y_pos_mm = 62
 
-start_number = 40100000004537
-end_number = 40100000006536
+start_number = 40100000006337
+end_number = 40100000008156
 
 batch_size = 50  # <--- создаём отдельный файл каждые 50 шт.
 
@@ -29,7 +29,7 @@ writer_options = {
 
 template = PdfReader(template_pdf)
 
-current_batch = 65   # Начальный номер пачки
+current_batch = 1   # Начальный номер пачки
 counter = 0
 writer = PdfWriter()
 
