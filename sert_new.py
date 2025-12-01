@@ -9,7 +9,7 @@ import io
 from copy import deepcopy
 
 # ==== Настройки ====#
-template_pdf = "сертификат_prom.pdf"
+template_pdf = "сертификат_kojzaw.pdf"
 output_name_pattern = "barcodes_prom_100_{}.pdf"  # {} будет номер пачки
 x_pos_mm = 220
 y_pos_mm = 62
