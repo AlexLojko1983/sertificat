@@ -14,8 +14,8 @@ output_name_pattern = "barcodes_ispolkom_50_{}.pdf"  # {} будет номер 
 x_pos_mm = 220
 y_pos_mm = 62
 
-start_number = 50100000008500
-end_number = 50100000008540
+start_number = 10600000000117
+end_number = 10600000000162
 
 batch_size = 50  # <--- создаём отдельный файл каждые 50 шт.
 
