@@ -10,7 +10,7 @@ from copy import deepcopy
 
 # ==== Настройки ====#
 template_pdf = "сертификат_30_110226.pdf"
-output_name_pattern = "barcodes_30_scool_{}.pdf"  # {} будет номер пачки
+output_name_pattern = "barcodes_30_school_{}.pdf"  # {} будет номер пачки
 x_pos_mm = 220
 y_pos_mm = 62
 
