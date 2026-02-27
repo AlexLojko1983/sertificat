@@ -1,3 +1,5 @@
+import os
+
 import barcode
 from barcode.writer import ImageWriter
 from PyPDF2 import PdfReader, PdfWriter
@@ -9,13 +11,13 @@ import io
 from copy import deepcopy
 
 # ==== Настройки ====#
-template_pdf = "сертификат_20_260306.pdf"
-output_name_pattern = "barcodes_20_sanstancija_{}.pdf"  # {} будет номер пачки
+template_pdf = "сертификат_cash_30.pdf"
+output_name_pattern = "barcodes_30_cash_{}.pdf"  # {} будет номер пачки
 x_pos_mm = 220
 y_pos_mm = 62
 
-start_number = 10200000001638
-end_number = 10200000001867
+start_number = 30100000002906
+end_number = 30100000002927
 
 batch_size = 50  # <--- создаём отдельный файл каждые 50 шт.
 
@@ -60,8 +62,9 @@ for num in range(start_number, end_number + 1):
     counter += 1
 
     # Если пачка заполнилась — сохраняем файл
+    output_folder = "files"
     if counter == batch_size:
-        output_pdf = output_name_pattern.format(current_batch)
+        output_pdf = os.path.join(output_folder, output_name_pattern.format(current_batch))
         with open(output_pdf, "wb") as f:
             writer.write(f)
 
@@ -73,8 +76,9 @@ for num in range(start_number, end_number + 1):
         counter = 0
 
 # Сохраняем остаток (если не делится ровно)
+output_folder = "files"
 if counter > 0:
-    output_pdf = output_name_pattern.format(current_batch)
+    output_pdf = os.path.join(output_folder, output_name_pattern.format(current_batch))
     with open(output_pdf, "wb") as f:
         writer.write(f)
     print(f"✅ Сохранён файл: {output_pdf}")
