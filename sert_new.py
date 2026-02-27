@@ -31,7 +31,7 @@ writer_options = {
 
 template = PdfReader(template_pdf)
 
-current_batch = 3   # Начальный номер пачки
+current_batch = 1   # Начальный номер пачки
 counter = 0
 writer = PdfWriter()
 
