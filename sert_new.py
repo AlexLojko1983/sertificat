@@ -11,7 +11,7 @@ import io
 from copy import deepcopy
 
 # ==== Настройки ====#
-template_pdf = "сертификат_30_060326.pdf"
+template_pdf = "сертификат_30_06032026.pdf"
 output_name_pattern = "barcodes_30_dispensary_{}.pdf"  # {} будет номер пачки
 x_pos_mm = 220
 y_pos_mm = 62
