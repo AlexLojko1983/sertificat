@@ -11,13 +11,13 @@ import io
 from copy import deepcopy
 
 # ==== Настройки ====#
-template_pdf = "сертификат_30_06032026.pdf"
-output_name_pattern = "barcodes_30_dispensary_{}.pdf"  # {} будет номер пачки
+template_pdf = "сертификат_40_060326.pdf"
+output_name_pattern = "barcodes_40_8marta_{}.pdf"  # {} будет номер пачки
 x_pos_mm = 220
 y_pos_mm = 62
 
-start_number = 30100000002929
-end_number = 30100000003001
+start_number = 40100000009180
+end_number = 40100000009378
 
 batch_size = 50  # <--- создаём отдельный файл каждые 50 шт.
 
