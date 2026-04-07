@@ -1,0 +1,228 @@
+import os
+import io
+from copy import deepcopy
+
+from PyQt5.QtWidgets import (
+    QApplication, QWidget, QLabel, QLineEdit,
+    QPushButton, QFileDialog, QVBoxLayout, QMessageBox
+)
+
+import barcode
+from barcode.writer import ImageWriter
+from PyPDF2 import PdfReader, PdfWriter
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import A4, landscape
+from reportlab.lib.units import mm
+from PIL import Image
+
+
+def generate_barcodes(
+    template_pdf,
+    output_name,
+    start_number,
+    end_number,
+    batch_size,
+    output_dir
+):
+    writer_options = {
+        "font_size": 6,
+        "text_distance": 3.5,
+        "module_height": 15.0,
+        "module_width": 0.2
+    }
+
+    template = PdfReader(template_pdf)
+
+    x_pos_mm = 220
+    y_pos_mm = 62
+
+    current_batch = 1
+    counter = 0
+    writer = PdfWriter()
+
+    os.makedirs(output_dir, exist_ok=True)
+
+    base_name, ext = os.path.splitext(output_name)
+
+    for num in range(start_number, end_number + 1):
+        code = str(num).zfill(14)
+
+        code128 = barcode.get('code128', code, writer=ImageWriter())
+        barcode_buffer = io.BytesIO()
+        code128.write(barcode_buffer, options=writer_options)
+        barcode_buffer.seek(0)
+        img = Image.open(barcode_buffer)
+
+        overlay_buffer = io.BytesIO()
+        c = canvas.Canvas(overlay_buffer, pagesize=landscape(A4))
+        c.drawInlineImage(img, x_pos_mm * mm, y_pos_mm * mm,
+                          width=60 * mm, height=29 * mm)
+        c.save()
+        overlay_buffer.seek(0)
+
+        overlay_pdf = PdfReader(overlay_buffer)
+
+        page = deepcopy(template.pages[0])
+        page.merge_page(overlay_pdf.pages[0])
+        writer.add_page(page)
+
+        counter += 1
+        batch_start = start_number
+
+        if counter == batch_size:
+            batch_end = num
+
+            filename = f"{base_name}_{current_batch}_{batch_start}-{batch_end}{ext}"
+            output_path = os.path.join(output_dir, filename)
+
+            with open(output_path, "wb") as f:
+                writer.write(f)
+
+            writer = PdfWriter()
+            current_batch += 1
+            counter = 0
+            batch_start = num + 1
+
+    # остаток
+    if counter > 0:
+        batch_end = end_number
+
+        filename = f"{base_name}_{current_batch}_{batch_start}-{batch_end}{ext}"
+        output_path = os.path.join(output_dir, filename)
+
+        with open(output_path, "wb") as f:
+            writer.write(f)
+
+    return "files/"
+
+
+class App(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Генератор штрихкодов")
+        self.setGeometry(300, 300, 400, 250)
+
+        layout = QVBoxLayout()
+
+        # PDF
+        self.label_pdf = QLabel("Шаблон PDF:")
+        self.input_pdf = QLineEdit()
+        self.btn_pdf = QPushButton("Выбрать PDF")
+        self.btn_pdf.clicked.connect(self.select_pdf)
+
+        # диапазон
+        self.label_start = QLabel("Начальный номер:")
+        self.input_start = QLineEdit()
+
+        self.label_end = QLabel("Конечный номер:")
+        self.input_end = QLineEdit()
+
+        self.label_dir = QLabel("Папка сохранения:")
+        self.input_dir = QLineEdit()
+
+        self.btn_dir = QPushButton("Выбрать папку")
+        self.btn_dir.clicked.connect(self.select_dir)
+
+        layout.addWidget(self.label_dir)
+        layout.addWidget(self.input_dir)
+        layout.addWidget(self.btn_dir)
+
+        # output
+        self.label_output = QLabel("Имя выходного файла:")
+        self.input_output = QLineEdit()
+        self.input_output.setPlaceholderText("result.pdf")
+
+        # кнопка
+        self.btn_run = QPushButton("🚀 Запустить")
+        self.btn_run.clicked.connect(self.run)
+
+        # статус
+        self.status = QLabel("")
+
+        # layout
+        layout.addWidget(self.label_pdf)
+        layout.addWidget(self.input_pdf)
+        layout.addWidget(self.btn_pdf)
+
+        layout.addWidget(self.label_start)
+        layout.addWidget(self.input_start)
+
+        layout.addWidget(self.label_end)
+        layout.addWidget(self.input_end)
+
+        layout.addWidget(self.label_output)
+        layout.addWidget(self.input_output)
+
+        layout.addWidget(self.btn_run)
+        layout.addWidget(self.status)
+
+        self.setLayout(layout)
+
+        self.label_batch = QLabel("Размер пачки (по умолчанию 50):")
+        self.input_batch = QLineEdit()
+        self.input_batch.setPlaceholderText("50")
+
+        layout.addWidget(self.label_batch)
+        layout.addWidget(self.input_batch)
+
+    def select_pdf(self):
+        file_path, _ = QFileDialog.getOpenFileName(self, "Выбрать PDF", "", "PDF Files (*.pdf)")
+        if file_path:
+            self.input_pdf.setText(file_path)
+
+    def select_dir(self):
+        folder = QFileDialog.getExistingDirectory(self, "Выбрать папку")
+        if folder:
+            self.input_dir.setText(folder)
+
+    def run(self):
+        template = self.input_pdf.text()
+        start = self.input_start.text()
+        end = self.input_end.text()
+        output = self.input_output.text()
+        output_dir = self.input_dir.text()
+        batch = self.input_batch.text()
+
+        if not template or not start or not end or not output:
+            QMessageBox.warning(self, "Ошибка", "Заполните все поля")
+            return
+
+        if not output_dir:
+            QMessageBox.warning(self, "Ошибка", "Выберите папку сохранения")
+            return
+
+        try:
+            start = int(start)
+            end = int(end)
+        except:
+            QMessageBox.critical(self, "Ошибка", "Номера должны быть числами")
+            return
+
+        if batch:
+            try:
+                batch = int(batch)
+            except:
+                QMessageBox.critical(self, "Ошибка", "Размер пачки должен быть числом")
+                return
+        else:
+            batch = 50
+
+        try:
+            self.status.setText("Обработка...")
+            QApplication.processEvents()
+
+            generate_barcodes(template, output, start, end, batch, output_dir)
+
+            self.status.setText("Готово")
+            QMessageBox.information(self, "Успех", "Файлы созданы")
+
+        except Exception as e:
+            self.status.setText("Ошибка")
+            QMessageBox.critical(self, "Ошибка", str(e))
+
+
+if __name__ == "__main__":
+    app = QApplication([])
+    window = App()
+    window.show()
+    app.exec_()
