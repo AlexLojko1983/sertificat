@@ -2,7 +2,7 @@ import os
 import io
 from copy import deepcopy
 
-from PyQt5.QtWidgets import (
+from PyQt6.QtWidgets import (
     QApplication, QWidget, QLabel, QLineEdit,
     QPushButton, QFileDialog, QVBoxLayout, QMessageBox
 )
@@ -44,6 +44,8 @@ def generate_barcodes(
 
     base_name, ext = os.path.splitext(output_name)
 
+    batch_start = start_number
+
     for num in range(start_number, end_number + 1):
         code = str(num).zfill(14)
 
@@ -67,7 +69,6 @@ def generate_barcodes(
         writer.add_page(page)
 
         counter += 1
-        batch_start = start_number
 
         if counter == batch_size:
             batch_end = num
@@ -93,14 +94,12 @@ def generate_barcodes(
         with open(output_path, "wb") as f:
             writer.write(f)
 
-    return "files/"
-
 
 class App(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Генератор штрихкодов")
-        self.setGeometry(300, 300, 400, 250)
+        self.setGeometry(300, 300, 400, 300)
 
         layout = QVBoxLayout()
 
@@ -110,6 +109,12 @@ class App(QWidget):
         self.btn_pdf = QPushButton("Выбрать PDF")
         self.btn_pdf.clicked.connect(self.select_pdf)
 
+        # папка
+        self.label_dir = QLabel("Папка сохранения:")
+        self.input_dir = QLineEdit()
+        self.btn_dir = QPushButton("Выбрать папку")
+        self.btn_dir.clicked.connect(self.select_dir)
+
         # диапазон
         self.label_start = QLabel("Начальный номер:")
         self.input_start = QLineEdit()
@@ -117,32 +122,30 @@ class App(QWidget):
         self.label_end = QLabel("Конечный номер:")
         self.input_end = QLineEdit()
 
-        self.label_dir = QLabel("Папка сохранения:")
-        self.input_dir = QLineEdit()
-
-        self.btn_dir = QPushButton("Выбрать папку")
-        self.btn_dir.clicked.connect(self.select_dir)
-
-        layout.addWidget(self.label_dir)
-        layout.addWidget(self.input_dir)
-        layout.addWidget(self.btn_dir)
-
-        # output
+        # имя файла
         self.label_output = QLabel("Имя выходного файла:")
         self.input_output = QLineEdit()
         self.input_output.setPlaceholderText("result.pdf")
+
+        # batch
+        self.label_batch = QLabel("Размер пачки (по умолчанию 50):")
+        self.input_batch = QLineEdit()
+        self.input_batch.setPlaceholderText("50")
 
         # кнопка
         self.btn_run = QPushButton("🚀 Запустить")
         self.btn_run.clicked.connect(self.run)
 
-        # статус
         self.status = QLabel("")
 
         # layout
         layout.addWidget(self.label_pdf)
         layout.addWidget(self.input_pdf)
         layout.addWidget(self.btn_pdf)
+
+        layout.addWidget(self.label_dir)
+        layout.addWidget(self.input_dir)
+        layout.addWidget(self.btn_dir)
 
         layout.addWidget(self.label_start)
         layout.addWidget(self.input_start)
@@ -153,20 +156,18 @@ class App(QWidget):
         layout.addWidget(self.label_output)
         layout.addWidget(self.input_output)
 
+        layout.addWidget(self.label_batch)
+        layout.addWidget(self.input_batch)
+
         layout.addWidget(self.btn_run)
         layout.addWidget(self.status)
 
         self.setLayout(layout)
 
-        self.label_batch = QLabel("Размер пачки (по умолчанию 50):")
-        self.input_batch = QLineEdit()
-        self.input_batch.setPlaceholderText("50")
-
-        layout.addWidget(self.label_batch)
-        layout.addWidget(self.input_batch)
-
     def select_pdf(self):
-        file_path, _ = QFileDialog.getOpenFileName(self, "Выбрать PDF", "", "PDF Files (*.pdf)")
+        file_path, _ = QFileDialog.getOpenFileName(
+            self, "Выбрать PDF", "", "PDF Files (*.pdf)"
+        )
         if file_path:
             self.input_pdf.setText(file_path)
 
@@ -225,4 +226,4 @@ if __name__ == "__main__":
     app = QApplication([])
     window = App()
     window.show()
-    app.exec_()
+    app.exec()
