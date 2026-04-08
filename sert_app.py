@@ -2,6 +2,7 @@ import os
 import io
 from copy import deepcopy
 
+# noinspection PyPackageRequirements
 from PyQt6.QtWidgets import (
     QApplication, QWidget, QLabel, QLineEdit,
     QPushButton, QFileDialog, QVBoxLayout, QMessageBox
