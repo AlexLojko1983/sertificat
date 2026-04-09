@@ -95,6 +95,20 @@ def generate_barcodes(
         with open(output_path, "wb") as f:
             writer.write(f)
 
+def is_valid_pdf(path):
+    if not os.path.isfile(path):
+        return False
+    if not path.lower().endswith(".pdf"):
+        return False
+    try:
+        PdfReader(path)
+        return True
+    except:
+        return False
+
+def is_valid_number(value):
+    return value.isdigit() and len(value) == 14
+
 
 class App(QWidget):
     def __init__(self):
@@ -185,8 +199,22 @@ class App(QWidget):
         output_dir = self.input_dir.text()
         batch = self.input_batch.text()
 
+        # проверка PDF
+        if not is_valid_pdf(template):
+            QMessageBox.critical(self, "Ошибка", "Выбранный файл не является корректным PDF")
+            return
+
+        # проверка чисел
+        if not is_valid_number(start) or not is_valid_number(end):
+            QMessageBox.critical(self, "Ошибка", "Номера должны состоять ровно из 14 цифр")
+            return
+
+        if start > end:
+            QMessageBox.critical(self, "Ошибка", "Начальный номер больше конечного")
+            return
+
         if not template or not start or not end or not output:
-            QMessageBox.warning(self, "Ошибка", "Заполните все поля")
+            QMessageBox.warning(self, "Ошибка", "Заполните поле НОМЕР!")
             return
 
         if not output_dir:
