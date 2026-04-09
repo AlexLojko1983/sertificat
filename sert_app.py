@@ -17,9 +17,17 @@ from reportlab.lib.units import mm
 from PIL import Image
 
 import logging
+import sys
+
+def get_app_dir():
+    if getattr(sys, 'frozen', False):
+        return os.path.dirname(sys.executable)
+    return os.path.dirname(os.path.abspath(__file__))
+
+log_path = os.path.join(get_app_dir(), "error.log")
 
 logging.basicConfig(
-    filename="error.log",
+    filename=log_path,
     level=logging.ERROR,
     format="%(asctime)s - %(levelname)s - %(message)s"
 )
