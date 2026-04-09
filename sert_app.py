@@ -16,6 +16,13 @@ from reportlab.lib.pagesizes import A4, landscape
 from reportlab.lib.units import mm
 from PIL import Image
 
+import logging
+
+logging.basicConfig(
+    filename="error.log",
+    level=logging.ERROR,
+    format="%(asctime)s - %(levelname)s - %(message)s"
+)
 
 def generate_barcodes(
     template_pdf,
@@ -196,20 +203,25 @@ class App(QWidget):
         start = self.input_start.text()
         end = self.input_end.text()
         output = self.input_output.text()
+        if not output.lower().endswith(".pdf"):
+            output += ".pdf"
         output_dir = self.input_dir.text()
         batch = self.input_batch.text()
 
         # проверка PDF
         if not is_valid_pdf(template):
+            logging.error("Неправильный шаблон")
             QMessageBox.critical(self, "Ошибка", "Выбранный файл не является корректным PDF")
             return
 
         # проверка чисел
         if not is_valid_number(start) or not is_valid_number(end):
+            logging.error("Неправильное кольчество символов")
             QMessageBox.critical(self, "Ошибка", "Номера должны состоять ровно из 14 цифр")
             return
 
         if start > end:
+            logging.error("Начальный номер больше конечного")
             QMessageBox.critical(self, "Ошибка", "Начальный номер больше конечного")
             return
 
@@ -246,8 +258,13 @@ class App(QWidget):
             self.status.setText("Готово")
             QMessageBox.information(self, "Успех", "Файлы созданы")
 
+
         except Exception as e:
+
             self.status.setText("Ошибка")
+
+            logging.exception("Ошибка при генерации")
+
             QMessageBox.critical(self, "Ошибка", str(e))
 
 
