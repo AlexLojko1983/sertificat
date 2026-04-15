@@ -19,6 +19,32 @@ from PIL import Image
 import logging
 import sys
 
+from reportlab.lib.pagesizes import A4
+
+def is_a4_pdf(path, tolerance=5):
+    try:
+        reader = PdfReader(path)
+        page = reader.pages[0]
+
+        # размеры страницы в points
+        width = float(page.mediabox.width)
+        height = float(page.mediabox.height)
+
+        a4_w, a4_h = A4  # (595.27, 841.89)
+
+        # проверка с учётом альбомной ориентации
+        is_a4 = (
+            abs(width - a4_w) < tolerance and abs(height - a4_h) < tolerance
+        ) or (
+            abs(width - a4_h) < tolerance and abs(height - a4_w) < tolerance
+        )
+
+        return is_a4
+
+    except Exception as e:
+        logging.exception("Ошибка проверки формата PDF")
+        return False
+
 def get_app_dir():
     if getattr(sys, 'frozen', False):
         return os.path.dirname(sys.executable)
@@ -41,6 +67,7 @@ def generate_barcodes(
     output_dir
 ):
     writer_options = {
+        "write_text": False,
         "font_size": 6,
         "text_distance": 3.5,
         "module_height": 15.0,
@@ -65,11 +92,14 @@ def generate_barcodes(
     for num in range(start_number, end_number + 1):
         code = str(num).zfill(14)
 
-        code128 = barcode.get('code128', code, writer=ImageWriter())
-        barcode_buffer = io.BytesIO()
-        code128.write(barcode_buffer, options=writer_options)
-        barcode_buffer.seek(0)
-        img = Image.open(barcode_buffer)
+        try:
+            code128 = barcode.get('code128', code, writer=ImageWriter())
+            barcode_buffer = io.BytesIO()
+            code128.write(barcode_buffer, options=writer_options)
+            barcode_buffer.seek(0)
+            img = Image.open(barcode_buffer)
+        except Exception as e:
+            logging.exception(f"Ошибка шк-да:{code}")
 
         overlay_buffer = io.BytesIO()
         c = canvas.Canvas(overlay_buffer, pagesize=landscape(A4))
@@ -217,6 +247,10 @@ class App(QWidget):
         batch = self.input_batch.text()
 
         # проверка PDF
+        if not is_a4_pdf(template):
+            QMessageBox.critical(self, "Ошибка", "PDF должен быть формата A4")
+            return
+        
         if not is_valid_pdf(template):
             logging.error("Неправильный шаблон")
             QMessageBox.critical(self, "Ошибка", "Выбранный файл не является корректным PDF")
@@ -236,6 +270,8 @@ class App(QWidget):
         if not template or not start or not end or not output:
             QMessageBox.warning(self, "Ошибка", "Заполните поле НОМЕР!")
             return
+        
+        
 
         if not output_dir:
             QMessageBox.warning(self, "Ошибка", "Выберите папку сохранения")
