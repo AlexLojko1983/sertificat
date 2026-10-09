@@ -67,7 +67,7 @@ def generate_barcodes(
     output_dir
 ):
     writer_options = {
-        "write_text": False,
+        "write_text": True,
         "font_size": 6,
         "text_distance": 3.5,
         "module_height": 15.0,
@@ -76,8 +76,8 @@ def generate_barcodes(
 
     template = PdfReader(template_pdf)
 
-    x_pos_mm = 220
-    y_pos_mm = 62
+    x_pos_mm = 70
+    y_pos_mm = 69
 
     current_batch = 1
     counter = 0
@@ -104,7 +104,7 @@ def generate_barcodes(
         overlay_buffer = io.BytesIO()
         c = canvas.Canvas(overlay_buffer, pagesize=landscape(A4))
         c.drawInlineImage(img, x_pos_mm * mm, y_pos_mm * mm,
-                          width=60 * mm, height=29 * mm)
+                          width=160 * mm, height=69 * mm)
         c.save()
         overlay_buffer.seek(0)
 
